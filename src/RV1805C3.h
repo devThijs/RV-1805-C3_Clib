@@ -9,8 +9,13 @@
 #ifndef RV1805C3_H
 #define RV1805C3_H
 
-#include "Arduino.h"
-#include "Wire.h"
+#include <stdint.h>
+#include <stdio.h>
+#include <stdbool.h>
+
+#ifdef _Cpluspluss
+	extern "C" {
+#endif
 
 #define RV1805C3_ADDRESS		0x69
 
@@ -65,7 +70,9 @@
 
 #define DATETIME_COMPONENTS		8
 
-enum DateTimeComponent {
+
+
+typedef enum DateTimeComponent {
 	DATETIME_HUNDREDTH = 0,
 	DATETIME_SECOND = 1,
 	DATETIME_MINUTE = 2,
@@ -74,10 +81,10 @@ enum DateTimeComponent {
 	DATETIME_MONTH = 5,
 	DATETIME_YEAR = 6,
 	DATETIME_DAY_OF_WEEK = 7
-};
-typedef uint8_t DateTimeComponent_t;
+}DateTimeComponent_t;
 
-enum DayOfWeek {
+
+typedef enum DayOfWeek {
 	SUN = 0,
 	MON = 1,
 	TUE = 2,
@@ -85,10 +92,9 @@ enum DayOfWeek {
 	THU = 4,
 	FRI = 5,
 	SAT = 6
-};
-typedef uint8_t DayOfWeek_t;
+}DayOfWeek_t;
 
-enum AlarmMode {
+typedef enum AlarmMode {
 	ALARM_DISABLED = 0,
 	ALARM_ONCE_PER_YEAR = 1,
 	ALARM_ONCE_PER_MONTH = 2,
@@ -99,25 +105,25 @@ enum AlarmMode {
 	ALARM_ONCE_PER_SECOND = 7,
 	ALARM_ONCE_PER_TENTH = 8,
 	ALARM_ONCE_PER_HUNDREDTH = 9
-};
-typedef uint8_t AlarmMode_t;
+}AlarmMode_t;
 
-enum CountdownUnit {
+
+typedef enum CountdownUnit {
 	COUNTDOWN_SECONDS = 0b10,
 	COUNTDOWN_MINUTES = 0b11
-};
-typedef uint8_t CountdownUnit_t;
+}CountdownUnit_t;
 
-enum InterruptType {
+
+typedef enum InterruptType {
 	INTERRUPT_WATCHDOG_TIMER = 5,
 	INTERRUPT_BATTERY_LOW = 4,
 	INTERRUPT_TIMER = 3,
 	INTERRUPT_ALARM = 2,
 	INTERRUPT_EXTERNAL = 1
-};
-typedef uint8_t InterruptType_t;
+}InterruptType_t;
 
-enum SleepWaitPeriod {
+
+typedef enum SleepWaitPeriod {
 	SLEEP_IMMEDIATELY = 0b000,
 	SLEEP_WAIT_8MS = 0b001,
 	SLEEP_WAIT_16MS = 0b010,
@@ -126,10 +132,10 @@ enum SleepWaitPeriod {
 	SLEEP_WAIT_40MS = 0b101,
 	SLEEP_WAIT_48MS = 0b110,
 	SLEEP_WAIT_56MS = 0b111
-};
-typedef uint8_t SleepWaitPeriod_t;
+}SleepWaitPeriod_t;
 
-enum PowerSwitchFunction {
+
+typedef enum PowerSwitchFunction {
 	PSWS_INVERSE_COMBINED_IRQ = 0b000,
 	PSWS_SQW = 0b001,
 	PSWS_INVERSE_AIRQ = 0b011,
@@ -137,58 +143,55 @@ enum PowerSwitchFunction {
 	PSWS_INVERSE_TIRQ = 0b101,
 	PSWS_SLEEP = 0b110,
 	PSWS_STATIC = 0b111
-};
-typedef uint8_t PowerSwitchFunction_t;
+}PowerSwitchFunction_t;
 
-class RV1805C3 {
-	public:
-		RV1805C3();
-		bool begin(TwoWire &wirePort = Wire);
+uint8_t _dateTime[DATETIME_COMPONENTS];
 
-		void reset();
-		void enableCrystalOscillator();
-		void disableCrystalOscillator();
-		void enableOscillatorSwitching();
-		void reduceLeakage();
+		bool RV1805C3_init();
+		void RV1805C3_reset();	//works I think
+		void RV1805C3_enableCrystalOscillator(); 	//probably works
 
-		char* getCurrentDateTime();
-		void setDateTimeFromISO8601(String iso8601);
-		void setDateTimeFromISO8601(const char *iso8601);
-		void setDateTimeFromHTTPHeader(String str);
-		void setDateTimeFromHTTPHeader(const char *str);
-		bool setDateTime(uint16_t year, uint8_t month, uint8_t dayOfMonth, DayOfWeek_t dayOfWeek, uint8_t hour, uint8_t minute, uint8_t second = 0, uint8_t hundredth = 0);
-		void setDateTimeComponent(DateTimeComponent_t component, uint8_t value);
-		bool synchronize();
+		void RV1805C3_disableCrystalOscillator(); //works
+		void RV1805C3_enableOscillatorSwitching(); //works
+		void RV1805C3_reduceLeakage();//works
 
-		bool setAlarmMode(AlarmMode_t mode);
-		bool setAlarmFromISO8601(String iso8601);
-		bool setAlarmFromISO8601(const char *iso8601);
-		bool setAlarmFromHTTPHeader(String str);
-		bool setAlarmFromHTTPHeader(const char *str);
-		bool setAlarm(uint16_t year, uint8_t month, uint8_t dayOfMonth, DayOfWeek_t dayOfWeek, uint8_t hour, uint8_t minute, uint8_t second = 0, uint8_t hundredth = 0);
+		char* RV1805C3_getCurrentDateTime(); //works
+		void RV1805C3_setDateTimeFromISO8601(const char *iso8601);
+		void RV1805C3_setDateTimeFromHTTPHeader(const char *str);
+		bool RV1805C3_setDateTime(uint16_t year, uint8_t month, uint8_t dayOfMonth, DayOfWeek_t dayOfWeek, uint8_t hour, uint8_t minute, uint8_t second, uint8_t hundredth);	//works
+		void RV1805C3_setDateTimeComponent(DateTimeComponent_t component, uint8_t value);	//works
+		void RV1805C3_synchronize(); //works
 
-		void setCountdownTimer(uint8_t period, CountdownUnit_t unit, bool repeat = true, bool interruptAsPulse = true);
 
-		void enableInterrupt(InterruptType_t type);
-		void disableInterrupt(InterruptType_t type);
-		uint8_t clearInterrupts();
+		void RV1805C3_setAlarmMode(AlarmMode_t mode);
+		void RV1805C3_setAlarmFromISO8601(const char *iso8601);
+		void RV1805C3_setAlarmFromHTTPHeader(const char *str);
+		int RV1805C3_setAlarm(uint16_t year, uint8_t month, uint8_t dayOfMonth, DayOfWeek_t dayOfWeek, uint8_t hour, uint8_t minute, uint8_t second, uint8_t hundredth);
 
-		void sleep(SleepWaitPeriod_t waitPeriod = SLEEP_IMMEDIATELY, bool disableInterface = false);
-		void setPowerSwitchFunction(PowerSwitchFunction_t function);
-		void lockPowerSwitch();
-		void unlockPowerSwitch();
-		void setStaticPowerSwitchOutput(uint8_t level); // HIGH or LOW as level; unlockPowerSwitch() must be called first
+		void RV1805C3_setCountdownTimer(uint8_t period, CountdownUnit_t unit, bool repeat, bool interruptAsPulse);
 
-		uint8_t convertToDecimal(uint8_t bcd);
-		uint8_t convertToBCD(uint8_t decimal);
+		void RV1805C3_enableInterrupt(InterruptType_t type);
+		void RV1805C3_disableInterrupt(InterruptType_t type);
+		uint8_t RV1805C3_clearInterrupts();
 
-		bool readBytesFromRegisters(uint8_t startAddress, uint8_t *destination, uint8_t length);
-		bool writeBytesToRegisters(uint8_t startAddress, uint8_t *values, uint8_t length);
-		uint8_t readByteFromRegister(uint8_t address);
-		bool writeByteToRegister(uint8_t address, uint8_t value);
-	private:
-		uint8_t _dateTime[DATETIME_COMPONENTS];
-		TwoWire *_i2cPort;
-};
+		void RV1805C3_sleep(SleepWaitPeriod_t waitPeriod, bool disableInterface);
+		void RV1805C3_setPowerSwitchFunction(PowerSwitchFunction_t function);
+		void RV1805C3_lockPowerSwitch();
+		void RV1805C3_unlockPowerSwitch();
+		void RV1805C3_setStaticPowerSwitchOutput(uint8_t level); // HIGH or LOW as level; unlockPowerSwitch() must be called first
+
+		static uint8_t convertToDecimal(uint8_t bcd);
+		static uint8_t convertToBCD(uint8_t decimal);
+
+		static uint8_t readRegister(uint8_t reg);
+		static void readBytesFromRegisters(uint8_t startAddress, uint8_t *destination, uint8_t length);
+		static void writeByteToRegister(uint8_t reg, uint16_t data);
+		static void writeBytesToRegisters(uint8_t startAddress, uint8_t *values, uint8_t length);
+		
+
+#ifdef _Cplusplus
+	}
+#endif
+
 
 #endif
